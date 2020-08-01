@@ -1,0 +1,46 @@
+.card {
+	margin: 5% 15% 0% 15%;
+    width: 70%;
+}
+
+.select_head {
+    float: left;
+    width: 6%;
+    margin-right: 3%;
+}
+
+.select {
+    float: left;
+	width: 6%;
+	margin-top: 1%;
+    margin-right: 3%;
+}
+
+.uid {
+    float: left;
+    width: 10%;
+    margin-right: 3%;
+}
+
+.name {
+    float: left;
+    width: 10%;
+    margin-right: 3%;
+}
+
+.email {
+    float: left;
+    width: 25%;
+	margin-right: 3%;
+}
+
+.pwd {
+    float: left;
+    width: 16%;
+    margin-right: 3%;
+}
+
+.card_num {
+    float: right;
+    width: 17%;
+}
