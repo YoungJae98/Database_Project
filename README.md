@@ -30,6 +30,7 @@ npm install -s body-parser
 npm install -s mysql 
 npm install -s cookie
 npm insatll -s sanitize-html
+npm install -s express-session
 
 위의 명령어들을 차례로 실행시킨 후 해당 디렉토리에서 다시 pm2 start app.js를 실행시 프로그램 이용이 가능합니다.
 
