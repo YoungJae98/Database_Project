@@ -17,6 +17,7 @@ var admin = require('./Interface/admin');
 var cookie = require('cookie');
 var sanitizeHtml = require('sanitize-html');
 var session = require('express-session');
+var FileStore = require('session-file-store')(session)
 
 //db와 연결 - amazon rds에 올려둔 db와 연결하였습니다.
 var db = mysql.createConnection({
@@ -30,7 +31,8 @@ var db = mysql.createConnection({
 app.use(session({
     secret: 'akdlsjai!@^$(128y1i7urhfkjas',
     resave: false,
-    saveUninitialized: true
+    saveUninitialized: true,
+    store: new FileStore()
 }))
 
 //body에서 가져오는 값들을 파싱해주기 위한 코드
