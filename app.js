@@ -19,13 +19,12 @@ var sanitizeHtml = require('sanitize-html');
 var session = require('express-session');
 var FileStore = require('session-file-store')(session)
 
-//db와 연결 - amazon rds에 올려둔 db와 연결하였습니다.
+//localhost로 수정
 var db = mysql.createConnection({
-    host: 'ourdatabaseproject.cnfauaikje6z.us-east-2.rds.amazonaws.com',
-    user: 'admin',
+    host: 'localhost',
+    user: 'root',
     database: 'PJ',
-    password: '03170317',
-    port: 3306
+    password: 'root',
 });
 
 app.use(session({
