@@ -16,6 +16,7 @@ var user = require('./Interface/user');
 var admin = require('./Interface/admin');
 var cookie = require('cookie');
 var sanitizeHtml = require('sanitize-html');
+var session = require('express-session');
 
 //db와 연결 - amazon rds에 올려둔 db와 연결하였습니다.
 var db = mysql.createConnection({
@@ -25,6 +26,12 @@ var db = mysql.createConnection({
     password: '03170317',
     port: 3306
 });
+
+app.use(session({
+    secret: 'akdlsjai!@^$(128y1i7urhfkjas',
+    resave: false,
+    saveUninitialized: true
+}))
 
 //body에서 가져오는 값들을 파싱해주기 위한 코드
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -36,7 +43,7 @@ app.use(express.static('Interface'));
 app.get('/', (req, res) => {
     //auth 함수를 통해 쿠키에 id값이 있는지 없는지 판별
     if (user.auth(req, res)) {
-        var u_id = cookie.parse(req.headers.cookie).id;
+        var u_id = req.session.user;
         //쿠키에 값이 있을때 그 값이 admin이라면 관리자 페이지 아니라면 사용자 페이지로 이동
         if (u_id == 'admin') {
             res.redirect('/admin_main');
@@ -72,7 +79,9 @@ app.post('/login', (req, res) => {
             message = "<script>alert('비밀번호가 틀렸습니다!'); history.back();</script>";
         } else {
             //로그인 성공시 해당하는 id를 쿠키에 저장
-            res.cookie('id', id);
+            req.session.is_logined = true;
+            req.session.user = id;
+            req.session.save();
             message = "<script>alert('로그인 되었습니다!'); location.replace('/');</script>";
         }
         res.send(message);
@@ -80,8 +89,9 @@ app.post('/login', (req, res) => {
 });
 app.get('/logout', (req, res) => {
     //로그아웃시에는 생성되었던 쿠키를 지운 후 초기 경로로 이동
-    res.clearCookie('id');
-    res.send("<script>alert('로그아웃 되었습니다!'); location.replace('/');</script>");
+    req.session.destroy((err) => {
+        res.send("<script>alert('로그아웃 되었습니다!'); location.replace('/');</script>");
+    });
 });
 //회원가입 실행시
 app.post('/regist', (req, res) => {
@@ -104,11 +114,12 @@ app.post('/regist', (req, res) => {
 });
 //회원탈퇴 실행시
 app.get('/withdraw', (req, res) => {
-    id = cookie.parse(req.headers.cookie).id;
+    id = req.session.user;
     //쿠키값에 존재하는 아이디로 유저를 검색한 후 삭제하고 쿠키에서도 지우기
     db.query('delete from User where u_id = ?', [id], (err, result) => {
-        res.clearCookie('id');
-        res.send("<script>alert('탈퇴가 완료되었습니다.'); location.replace('/');</script>");
+        req.session.destroy((err) => {
+            res.send("<script>alert('탈퇴가 완료됐습니다!'); location.replace('/');</script>");
+        });
     })
 });
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -186,7 +197,7 @@ app.post('/rent', (req, res) => {
         //이전단계에서 선택된 탈것이 없다면 다시 되돌아가기
         res.send('<script>alert("탈것을 선택해주세요!"); history.back()</script>');
     } else {
-        var u_id = cookie.parse(req.headers.cookie).id;
+        var u_id = req.session.user;
         //Card 테이블에서 로그인한 유저가 카드가 있는지 없는지 확인
         db.query('select * from Card where User_u_id = ?', [u_id], function(err, result) {
             if (!result.length) {
@@ -248,7 +259,7 @@ app.post('/finish', (req, res) => {
     //전부 받아온 값이기때문에 (선택하거나 쿠키에 저장된 값) 따로 필터링은 필요가 없음
     var stime, etime, p_id, v_id, u_id, price;
     //각 변수에 대해 쿠키에서 파싱해서 저장
-    u_id = cookie.parse(req.headers.cookie).id;
+    u_id = req.session.user;
     p_id = cookie.parse(req.headers.cookie).p_id;
     v_id = cookie.parse(req.headers.cookie).v_id;
     stime = cookie.parse(req.headers.cookie).stime;
@@ -291,7 +302,7 @@ app.get('/myPage', (req, res) => {
 //회원정보 수정
 app.get('/userInfo', (req, res) => {
     var html = ``;
-    var id = cookie.parse(req.headers.cookie).id;
+    var id = req.session.user;
     //쿠키에 저장된 아이디를 통해서 본인의 정보를 db에서 가져온 후 프론트에 뿌리기
     db.query('select * from User where u_id = ?', [id], function(err, result) {
         html += user.userInfo(result[0].u_id, result[0].u_name, result[0].u_email, result[0].u_pw);
@@ -301,7 +312,7 @@ app.get('/userInfo', (req, res) => {
 //수정하는 과정
 app.post('/changeInfo', (req, res) => {
     //받아온 값들을 필터링
-    var u_id = cookie.parse(req.headers.cookie).id;
+    var u_id = req.session.user;
     var id = sanitizeHtml(req.body.id);
     var pw = sanitizeHtml(req.body.pw);
     var name = sanitizeHtml(req.body.name);
@@ -315,7 +326,7 @@ app.post('/changeInfo', (req, res) => {
             db.query(`update User set u_id = ?, u_pw = ?, u_name = ?, u_email = ? 
             where u_id = ?`, [id, pw, name, email, u_id], function(err, result) {
                 //수정된 유저의 아이디와 패스워드를 쿠키에 새롭게 저장
-                res.cookie('id', id);
+                res.session.user = id;
                 res.send("<script>alert('정보수정 성공!'); location.replace('/myPage');</script>");
             });
         }
@@ -324,7 +335,7 @@ app.post('/changeInfo', (req, res) => {
 //카드관리
 app.get('/card', (req, res) => {
     var html = ``;
-    var u_id = cookie.parse(req.headers.cookie).id;
+    var u_id = req.session.user;;
     //카드 테이블에서 현재 로그인 되어있는 유저의 카드가 있는지 확인
     db.query('select * from Card where User_u_id = ?', [u_id], function(err, result) {
         //유저에게 카드가 없다면 기본정보, 카드가 있다면 카드 정보를 프론트에 뿌리기
@@ -341,7 +352,7 @@ app.get('/card', (req, res) => {
 });
 //카드 갱신과정 - 입력된 값에 대해 실행
 app.post('/updateCard', (req, res) => {
-    var u_id = cookie.parse(req.headers.cookie).id;
+    var u_id = req.session.user;
     //입력된 각 값을 필터링
     var c_num = sanitizeHtml(req.body.c_num);
     var c_name = sanitizeHtml(req.body.c_name);
@@ -373,7 +384,7 @@ app.post('/updateCard', (req, res) => {
 app.get('/history', (req, res) => {
     var html = ``;
     var list = ``;
-    var u_id = cookie.parse(req.headers.cookie).id;
+    var u_id = req.session.user;
     //History 테이블에서 해당 유저가 이용한 기록만 선택 후 프론트에 뿌리기
     db.query('select * from History where User_u_id = ?', [u_id], function(err, result) {
         for (var i = 0; i < result.length; i++) {

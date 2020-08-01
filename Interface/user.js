@@ -31,10 +31,8 @@ module.exports = {
     },
     auth: function(req, res) {
         var isLogin = false;
-        if (req.headers.cookie) {
-            if (cookie.parse(req.headers.cookie).id) {
-                isLogin = true;
-            }
+        if (req.session.is_logined) {
+            isLogin = true;
         }
         return isLogin;
     },
