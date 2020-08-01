@@ -34,6 +34,8 @@ app.use(express.static('Interface'));
 
 //메인 페이지
 app.get('/', (req, res) => {
+
+
     //auth 함수를 통해 쿠키에 id값이 있는지 없는지 판별
     if (user.auth(req, res)) {
         var u_id = cookie.parse(req.headers.cookie).id;
