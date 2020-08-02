@@ -54,7 +54,7 @@ npm install -s express-session
    
    
    <p align="center">
-  <a href="https://github.com/reyeon1209/Database_Project_2/">
+  <a href="https://github.com/YoungJae98/Database_Project/">
     <img src="https://user-images.githubusercontent.com/46713032/86132151-7cc7b880-bb21-11ea-807a-4788f5f994df.png" alt="Vehicle logo" width="72" height="72">
   </a>
 </p>
@@ -88,7 +88,6 @@ npm install -s express-session
 
 - 프로젝트 개발 환경 : VS Code   
 - 프로젝트 언어 : Html, Css, JavaScript, Node.JS
-- [**추가 정보**](https://github.com/reyeon1209/Database_Project_2/wiki)는 클릭하세요.    
 
 
 ## 실행 화면
@@ -97,7 +96,7 @@ npm install -s express-session
 
 ## 실행 방법
 
-- [Download the latest release.](https://github.com/YoungJae98/Database_Project.git)
+- [Download the latest release.](https://github.com/YoungJae98/Database_Project/archive/master.zip)
 - Clone the repo: `https://github.com/YoungJae98/Database_Project.git`
 - Node.js, pm2 설치 
 - `pm2 start app.js` 입력 후 `localhost:3000/` 로 접속
