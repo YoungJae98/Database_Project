@@ -97,7 +97,7 @@ npm install -s express-session
 
 ## 실행 방법
 
-- [Download the latest release.](https://github.com/reyeon1209/Database_Project_2/archive/master.zip)
+- [Download the latest release.](https://github.com/YoungJae/Database_Project/archive/master.zip)
 - Clone the repo: `git clone https://github.com/reyeon1209/Database_Project_2.git`
 - Node.js, pm2 설치 
 - `pm2 start app.js` 입력 후 `localhost:3000/` 로 접속
