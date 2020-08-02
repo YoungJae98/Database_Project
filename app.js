@@ -23,7 +23,7 @@ var FileStore = require('session-file-store')(session)
 var db = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    database: 'PJ',
+    database: 'pj',
     password: 'root',
 });
 
@@ -419,7 +419,7 @@ app.get('/admin_vehicle', (req, res) => {
     var html = ``;
     var list = ``;
     //존재하는 모든 탈것들에 대해서 각 탈것이 존재하는 장소값을 함께 얻어오기 위해서 join을 이용
-    db.query(`select v.v_id, v.v_state, v.v_type, p.p_name from Vehicles as v
+    db.query(`select v.v_id, v.v_state, v.v_type, p.p_name from vehicles as v
         join Place as p on v.v_place = p.p_id`, function(err, vehicles) {
         //모든 탈것의 갯수만큼 돌면서 각 상태와 탈것의 종류를 변수로 설정한 후 프론트에 뿌리기
         for (var i = 0; i < vehicles.length; i++) {
