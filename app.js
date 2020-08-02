@@ -641,6 +641,6 @@ app.post('/addPlace', (req, res) => {
     });
 });
 //서버 연결
-app.listen(3000, () => {
+app.listen(3000, "0.0.0.0", () => {
     console.log('Connection!');
 });
