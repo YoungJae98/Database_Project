@@ -23,7 +23,7 @@ var FileStore = require('session-file-store')(session)
 var db = mysql.createConnection({
     host: 'project.c2nx6ni5nucx.ap-northeast-2.rds.amazonaws.com',
     user: 'admin',
-    database: 'pj',
+    database: 'PJ',
     password: '03170317',
     port: 3306
 });
@@ -73,7 +73,7 @@ app.post('/login', (req, res) => {
     var id = sanitizeHtml(req.body.id);
     var pw = sanitizeHtml(req.body.pw);
     //유저 아이디와 대조한 후 각 경우에 맞는 알람문 출력 후 경로 이동
-    db.query("select * from User where u_id = ?", [id], function(err, result) {
+    db.query("select * from user where u_id = ?", [id], function(err, result) {
         var message;
         if (!result.length) {
             message = "<script>alert('존재하지 않는 아이디 입니다.'); history.back();</script>";
@@ -102,12 +102,12 @@ app.post('/regist', (req, res) => {
     var pw = sanitizeHtml(req.body.pw);
     var name = sanitizeHtml(req.body.name);
     var email = sanitizeHtml(req.body.email);
-    db.query('select * from User where u_id = ?', [id], function(err, result) {
-        //이미 존재하는 아이디인지 체크 후 없다면 User 테이블에 추가
+    db.query('select * from user where u_id = ?', [id], function(err, result) {
+        //이미 존재하는 아이디인지 체크 후 없다면 user 테이블에 추가
         if (result.length) {
             res.send("<script>alert('이미 존재하는 아이디입니다!'); location.replace('/signIn');</script>");
         } else {
-            db.query(`insert into User(u_id, u_pw, u_name, u_email) 
+            db.query(`insert into user(u_id, u_pw, u_name, u_email) 
                 values(?, ?, ?, ?)`, [id, pw, name, email], function(err, result) {
                 res.send("<script>alert('회원가입 성공!'); location.replace('/signIn');</script>");
             });
@@ -118,7 +118,7 @@ app.post('/regist', (req, res) => {
 app.get('/withdraw', (req, res) => {
     id = req.session.user;
     //쿠키값에 존재하는 아이디로 유저를 검색한 후 삭제하고 쿠키에서도 지우기
-    db.query('delete from User where u_id = ?', [id], (err, result) => {
+    db.query('delete from user where u_id = ?', [id], (err, result) => {
         req.session.destroy((err) => {
             res.send("<script>alert('탈퇴가 완료됐습니다!'); location.replace('/');</script>");
         });
@@ -135,8 +135,8 @@ app.get('/user_main', (req, res) => {
 app.get('/searchPlace', (req, res) => {
     var list = ``;
     var html = ``;
-    //Place 테이블에서 모든 장소 가져온 후 테이블에 뿌리기
-    db.query('select * from Place', function(err, result) {
+    //place 테이블에서 모든 장소 가져온 후 테이블에 뿌리기
+    db.query('select * from place', function(err, result) {
         //체크박스에 대해서 check.js 파일에 있는 onclick함수를 이용해 다중선택 방지
         for (i = 0; i < result.length; i++) {
             list += `
@@ -159,16 +159,16 @@ app.post('/vList', (req, res) => {
     } else {
         var list = ``;
         var html = ``;
-        //Vehicle 테이블에서 현재 선택된 장소에 있는 탈 것들 중 사용 가능한 것들만 뽑아서 탈 것 종류순으로 정렬
-        db.query(`select v.v_id, v.v_type from Vehicle as v where v.v_id = 
-            (select vc.v_id from VehicleCheck as vc where vc.v_state = 1 and v.v_id = vc.v_id)
+        //vehicle 테이블에서 현재 선택된 장소에 있는 탈 것들 중 사용 가능한 것들만 뽑아서 탈 것 종류순으로 정렬
+        db.query(`select v.v_id, v.v_type from vehicle as v where v.v_id = 
+            (select vc.v_id from vehicleCheck as vc where vc.v_state = 1 and v.v_id = vc.v_id)
             and v_place = ?`, [req.body.id], function(err, result) {
             if (!result.length) {
                 //만약에 선택된 장소에 탈것이 존재하지 않는다면 다시 되돌아가기
                 res.send('<script>alert("현재 장소에 이용가능한 탈 것이 없습니다!"); history.back();</script>');
             } else {
                 //탈것이 있다면 해당 장소의 이름을 제목으로 넘겨주기 위해 Place테이블을 참조하고 프론트에 제목과 탈것들 뿌리기
-                db.query('select * from Place where p_id = ?', [req.body.id], function(err2, places) {
+                db.query('select * from place where p_id = ?', [req.body.id], function(err2, places) {
                     for (i = 0; i < result.length; i++) {
                         var type;
                         if (result[i].v_type == 1) {
@@ -200,14 +200,14 @@ app.post('/rent', (req, res) => {
         res.send('<script>alert("탈것을 선택해주세요!"); history.back()</script>');
     } else {
         var u_id = req.session.user;
-        //Card 테이블에서 로그인한 유저가 카드가 있는지 없는지 확인
-        db.query('select * from Card where User_u_id = ?', [u_id], function(err, result) {
+        //card 테이블에서 로그인한 유저가 카드가 있는지 없는지 확인
+        db.query('select * from card where User_u_id = ?', [u_id], function(err, result) {
             if (!result.length) {
                 //없다면 마이페이지의 카드 관리 페이지로 이동
                 res.send('<script>alert("카드를 먼저 등록해주세요!"); location.replace("/card")</script>');
             } else {
                 //있다면 대여 시작 후 자전거의 상태를 이용중으로 변경
-                db.query('update VehicleCheck set v_state = 2 where v_id = ?', [req.body.id], function(err, vehicle) {
+                db.query('update vehicleCheck set v_state = 2 where v_id = ?', [req.body.id], function(err, vehicle) {
                     var html = '';
                     //시작 시간 체크
                     var stime = new Date().toLocaleString();
@@ -238,9 +238,9 @@ app.post('/receipt', (req, res) => {
         price = req.body.using / 60 * 100;
     }
     //쿠키의 장소값과 일치하는 장소 검색 - 시작장소
-    db.query('select * from Place where p_id = ?', [p_id], function(err, result) {
-        //Place 테이블에서 모든 장소 가져오기 - 종료장소 입력을 위함
-        db.query('select * from Place', function(err2, places) {
+    db.query('select * from place where p_id = ?', [p_id], function(err, result) {
+        //place 테이블에서 모든 장소 가져오기 - 종료장소 입력을 위함
+        db.query('select * from place', function(err2, places) {
             //반복문을 이용해서 모든 장소를 옵션으로 넘겨줌
             for (var i = 0; i < places.length; i++) {
                 option += `
@@ -271,16 +271,16 @@ app.post('/finish', (req, res) => {
         res.send('<script>alert("반납장소를 선택하세요!"); history.back()</script>');
     } else {
         //넘어온 e_place 즉 종료 지점의 이름을 통해서 Place테이블에서 그 장소의 아이디값을 가져오기
-        db.query('select * from Place where p_name = ?', [req.body.e_place], function(err2, eplace) {
+        db.query('select * from place where p_name = ?', [req.body.e_place], function(err2, eplace) {
             //이전 단계에서 리스트로 존재하는 장소들의 목록을 주었기에 따로 예외처리는 필요없음
             //사용 내역에 사용된 기록 저장
-            db.query(`insert into History(Vehicle_id, s_time, e_time, h_price, s_place, e_place, User_u_id) 
+            db.query(`insert into history(Vehicle_id, s_time, e_time, h_price, s_place, e_place, User_u_id) 
             values(?, ?, ?, ?, ?, ?, ?)`, [v_id, stime, etime, price, p_id, eplace[0].p_id, u_id],
                 function(err3, result) {
                     //사용된 탈것에 대해서 사용된 횟수를 1회 증가하고 탈것이 다시 이용 가능하도록 수정
-                    db.query('update VehicleCheck set v_cnt = v_cnt + 1, v_state = 1 where v_id = ?', [v_id], function(err4, results) {
+                    db.query('update vehiclecheck set v_cnt = v_cnt + 1, v_state = 1 where v_id = ?', [v_id], function(err4, results) {
                         //사용 횟수가 증가되었을때, 탈것들 중에 사용 횟수가 10회가 넘어간 탈것들에 대해서 상태를 고장으로 변경
-                        db.query('update VehicleCheck set v_state = 0 where v_cnt > 10', function(err5, result5) {
+                        db.query('update vehiclecheck set v_state = 0 where v_cnt > 10', function(err5, result5) {
                             //모든 과정이 완료되었을때, 유저 아이디와 비밀번호를 제외한 나머지 값들을 쿠키에서 삭제
                             res.clearCookie('p_id');
                             res.clearCookie('v_id');
@@ -306,7 +306,7 @@ app.get('/userInfo', (req, res) => {
     var html = ``;
     var id = req.session.user;
     //쿠키에 저장된 아이디를 통해서 본인의 정보를 db에서 가져온 후 프론트에 뿌리기
-    db.query('select * from User where u_id = ?', [id], function(err, result) {
+    db.query('select * from user where u_id = ?', [id], function(err, result) {
         html += user.userInfo(result[0].u_id, result[0].u_name, result[0].u_email, result[0].u_pw);
         res.send(html);
     });
@@ -320,12 +320,12 @@ app.post('/changeInfo', (req, res) => {
     var name = sanitizeHtml(req.body.name);
     var email = sanitizeHtml(req.body.email);
     //받아온 id 값에 대해서 이미 있는 값인지 체크
-    db.query('select * from User where u_id = ?', [id], function(err, result) {
+    db.query('select * from user where u_id = ?', [id], function(err, result) {
         if (result.length && id != u_id) {
             res.send("<script>alert('이미 존재하는 아이디입니다!'); history.back();</script>");
         } else {
             //없는 값이라면 쿠키에 존재하는 아이디 값을 이용해서 유저의 정보 수정
-            db.query(`update User set u_id = ?, u_pw = ?, u_name = ?, u_email = ? 
+            db.query(`update user set u_id = ?, u_pw = ?, u_name = ?, u_email = ? 
             where u_id = ?`, [id, pw, name, email, u_id], function(err, result) {
                 //수정된 유저의 아이디와 패스워드를 쿠키에 새롭게 저장
                 res.session.user = id;
@@ -339,7 +339,7 @@ app.get('/card', (req, res) => {
     var html = ``;
     var u_id = req.session.user;;
     //카드 테이블에서 현재 로그인 되어있는 유저의 카드가 있는지 확인
-    db.query('select * from Card where User_u_id = ?', [u_id], function(err, result) {
+    db.query('select * from card where User_u_id = ?', [u_id], function(err, result) {
         //유저에게 카드가 없다면 기본정보, 카드가 있다면 카드 정보를 프론트에 뿌리기
         if (!result.length) {
             html += user.card("은행명입력", "카드번호입력", "CVC", "월", "년");
@@ -362,10 +362,10 @@ app.post('/updateCard', (req, res) => {
     //유효기간을 테이블에 넣기 위해서 간단한 수정
     var cvalid = parseInt(sanitizeHtml(req.body.c_month)) * 100 + parseInt(sanitizeHtml(req.body.c_year));
     //카드 테이블에서 로그인된 유저의 카드가 있는지 탐색
-    db.query('select * from Card where User_u_id = ?', [u_id], function(err, result) {
+    db.query('select * from card where User_u_id = ?', [u_id], function(err, result) {
         if (!result.length) {
             //카드가 없다면 입력된 정보들을 통해서 카드 테이블에 카드를 추가
-            db.query(`insert into Card(User_u_id, c_num, c_name, c_cvc, c_valid) 
+            db.query(`insert into card(User_u_id, c_num, c_name, c_cvc, c_valid) 
                 values(?, ?, ?, ?, ?)`, [u_id, c_num, c_name, c_cvc, cvalid], function(err2, result1) {
                 if (cookie.parse(req.headers.cookie).p_id) {
                     res.send("<script>alert('카드등록이 완료됐습니다!'); location.replace('/searchPlace');</script>")
@@ -375,7 +375,7 @@ app.post('/updateCard', (req, res) => {
             })
         } else {
             //카드가 있다면 입력된 정보를을 통해서 카드 테이블을 수정
-            db.query(`update Card set c_num = ?, c_name = ?, c_cvc = ?, c_valid = ? 
+            db.query(`update card set c_num = ?, c_name = ?, c_cvc = ?, c_valid = ? 
                 where User_u_id = ?`, [c_num, c_name, c_cvc, cvalid, u_id], function(err2, result1) {
                 res.send("<script>alert('카드수정이 완료됐습니다!'); history.back();</script>")
             })
@@ -387,8 +387,8 @@ app.get('/history', (req, res) => {
     var html = ``;
     var list = ``;
     var u_id = req.session.user;
-    //History 테이블에서 해당 유저가 이용한 기록만 선택 후 프론트에 뿌리기
-    db.query('select * from History where User_u_id = ?', [u_id], function(err, result) {
+    //history 테이블에서 해당 유저가 이용한 기록만 선택 후 프론트에 뿌리기
+    db.query('select * from history where User_u_id = ?', [u_id], function(err, result) {
         for (var i = 0; i < result.length; i++) {
             //사용시간을 출력할때, 가독성이 좋은 시간으로 출력하기 위해서 저장된 시간을 날짜와 시간 문자열로 나누어 다시 합침
             var stime = result[i].s_time.toLocaleDateString() + ' ' + result[i].s_time.toLocaleTimeString();
@@ -421,7 +421,7 @@ app.get('/admin_vehicle', (req, res) => {
     var list = ``;
     //존재하는 모든 탈것들에 대해서 각 탈것이 존재하는 장소값을 함께 얻어오기 위해서 join을 이용
     db.query(`select v.v_id, v.v_state, v.v_type, p.p_name from vehicles as v
-        join Place as p on v.v_place = p.p_id`, function(err, vehicles) {
+        join place as p on v.v_place = p.p_id`, function(err, vehicles) {
         //모든 탈것의 갯수만큼 돌면서 각 상태와 탈것의 종류를 변수로 설정한 후 프론트에 뿌리기
         for (var i = 0; i < vehicles.length; i++) {
             var state, avail, type;
@@ -455,7 +455,7 @@ app.post('/admin_manage_vehicle', (req, res) => {
     //넘어온 기능의 이름이 Add일때 addVehicle 페이지로 이동 이동하면서 모든 장소의 리스트를 옵션으로 넘겨줌
     if (req.body.name == 'Add') {
         var option = ``;
-        db.query('select * from Place', function(err, places) {
+        db.query('select * from place', function(err, places) {
             for (var i = 0; i < places.length; i++) {
                 option += `
                     <option value="${places[i].p_id}">${places[i].p_name}</option>
@@ -471,19 +471,19 @@ app.post('/admin_manage_vehicle', (req, res) => {
         //해당 기능의 이름이 Fix일때
         if (req.body.name === 'Fix') {
             //선택된 탈것의 사용횟수를 초기화하고 상태를 가능으로 수정
-            db.query('update VehicleCheck set v_state = 1, v_cnt = 0 where v_id = ?', [req.body.id], function(err, result) {
+            db.query('update vehiclecheck set v_state = 1, v_cnt = 0 where v_id = ?', [req.body.id], function(err, result) {
                 res.send('<script>alert("수리되었습니다!"); location.replace("/admin_vehicle");</script>');
             });
         } else if (req.body.name === 'Delete') {
             //해당 기능의 이름이 Delete일때 선택된 탈것을 삭제
-            db.query('delete from Vehicle where v_id = ?', [req.body.id], function(err, result) {
+            db.query('delete from vehicle where v_id = ?', [req.body.id], function(err, result) {
                 res.send('<script>alert("삭제되었습니다!"); location.replace("/admin_vehicle");</script>');
             });
         } else {
             //해당 기능의 이름이 history일때
             var list = ``;
-            //선택된 탈것의 기록을 History 테이블에서 가져오기
-            db.query('select * from History where Vehicle_id = ?', [req.body.id], function(err, result) {
+            //선택된 탈것의 기록을 history 테이블에서 가져오기
+            db.query('select * from history where Vehicle_id = ?', [req.body.id], function(err, result) {
                 if (!result.length) {
                     //기록이 없으면 없다고 출력 후 되돌아가기
                     res.send('<script>alert("사용기록이 존재하지 않습니다!"); history.back();</script>');
@@ -524,13 +524,13 @@ app.post('/addVehicle', (req, res) => {
         res.send("<script>alert('양식을 제대로 채워주세요!'); history.back();</script>");
     } else {
         //입력된 탈것의 아이디에 대해서 이미 존재하는 값인지 Vehicle에서 v_id로 검색
-        db.query('select * from Vehicle where v_id = ?', [v_id], function(err, vehicle) {
+        db.query('select * from vehicle where v_id = ?', [v_id], function(err, vehicle) {
             //이미 존재한다면 다시 되돌아가기
             if (vehicle.length) {
                 res.send('<script>alert("이미 존재하는 식별번호 입니다!"); history.back();</script>');
                 //존재하지 않는다면 해당하는 탈것을 추가하기 - 해당장소는 존재하는 장소의 리스트에서 받아왔기에 체크 불필요
             } else {
-                db.query(`insert into Vehicle(v_id, v_type, v_place)
+                db.query(`insert into vehicle(v_id, v_type, v_place)
                     values(?, ?, ?)`, [v_id, req.body.type, req.body.place], function(err1, result) {
                     res.send("<script>alert('추가되었습니다!'); location.replace('/admin_vehicle');</script>");
                 });
@@ -578,7 +578,7 @@ app.post('/deleteUser', (req, res) => {
         res.send('<script>alert("사용자를 선택해주세요!"); history.back()</script>');
     } else {
         //넘어온 id값을 이용해서 해당 유저를 삭제
-        db.query('delete from User where u_id = ?', [req.body.id], function(err, result) {
+        db.query('delete from user where u_id = ?', [req.body.id], function(err, result) {
             res.send('<script>alert("삭제되었습니다!"); location.replace("/admin_user")</script>');
         });
     }
@@ -587,8 +587,8 @@ app.post('/deleteUser', (req, res) => {
 app.get('/admin_place', (req, res) => {
     var html = ``;
     var list = ``;
-    //Place 테이블에서 모든 장소 가져온 후 프론트에 뿌리기
-    db.query('select * from Place', function(err, places) {
+    //place 테이블에서 모든 장소 가져온 후 프론트에 뿌리기
+    db.query('select * from place', function(err, places) {
         for (var i = 0; i < places.length; i++) {
             list += `
                 <br>
@@ -612,11 +612,11 @@ app.post('/admin_manage_place', (req, res) => {
         res.send('<script>alert("장소를 선택해주세요!"); history.back()</script>');
     } else {
         //선택된 장소에 대해 삭제 수행하기 전에 장소에 기기가 남아있으면 다시 되돌아가기
-        db.query('select * from Vehicle where v_place = ?', [req.body.id], function(err, vehicles) {
+        db.query('select * from vehicle where v_place = ?', [req.body.id], function(err, vehicles) {
             if (vehicles.length) {
                 res.send('<script>alert("장소에 아직 기기가 남아있습니다!"); history.back()</script>');
             } else {
-                db.query('delete from Place where p_id = ?', [req.body.id], function(err, result) {
+                db.query('delete from place where p_id = ?', [req.body.id], function(err, result) {
                     res.send('<script>alert("삭제되었습니다!"); location.replace("/admin_place");</script>');
                 });
             }
@@ -628,14 +628,14 @@ app.post('/addPlace', (req, res) => {
     //입력된 정보에 대해서 필터링
     var name = sanitizeHtml(req.body.name);
     var address = sanitizeHtml(req.body.address);
-    //Place 테이블에서 입력된 장소 이름에 해당하는 장소가 있는지 검색
-    db.query('select * from Place where p_name = ?', [name], function(err, places) {
+    //place 테이블에서 입력된 장소 이름에 해당하는 장소가 있는지 검색
+    db.query('select * from place where p_name = ?', [name], function(err, places) {
         if (places.length) {
             //장소가 있다면 다시 되돌아가기
             res.send('<script>alert("이미 존재하는 장소 입니다!"); history.back();</script>');
         } else {
-            //장소가 없다면 Place 테이블에 장소 추가
-            db.query('insert into Place(p_name, p_address) values(?, ?)', [name, address], function(err, result) {
+            //장소가 없다면 place 테이블에 장소 추가
+            db.query('insert into place(p_name, p_address) values(?, ?)', [name, address], function(err, result) {
                 res.send('<script>alert("추가되었습니다!"); location.replace("/admin_place");</script>');
             });
         }
