@@ -21,10 +21,11 @@ var FileStore = require('session-file-store')(session)
 
 //localhost로 수정
 var db = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
+    host: 'project.c2nx6ni5nucx.ap-northeast-2.rds.amazonaws.com',
+    user: 'admin',
     database: 'pj',
-    password: 'root',
+    password: 'admin',
+    port: 3306
 });
 
 app.use(session({
