@@ -34,25 +34,7 @@ npm install -s express-session
 
 위의 명령어들을 차례로 실행시킨 후 해당 디렉토리에서 다시 pm2 start app.js를 실행시 프로그램 이용이 가능합니다.
 
-
-
-**안내사항**
-
-    amazon rds 인스턴스에 db가 올라가 있기에 dump 파일을 이용해서 따로 db에 추가하지 않아도
-    프로그램은 정상적으로 돌아갑니다.
-    
-   **수정 amazon rds 데이터에비스 삭제로 인해서 dump파일을 이용해 db를 추가해야 사용 가능합니다. 
-
-   Interface 폴더는 유저와 관리자 인터페이스를 위한 파일들을 담아둔 폴더입니다.
-
-   db와 통신하고 데이터를 가져오는 쿼리문들은 모두 app.js에 존재하지만, 
-   app.js만 따로 빼서 실행시 실행되지 않습니다. 프로그램 실행은 꼭 Project 디렉토리에서 실행해야합니다.
-
-   주석은 통신을 다룬 app.js에 적어두었습니다. 나머지 파일들은 html을 모듈화하여 js로 저장해둔 파일과
-   프론트에서 이용하는 css와 js 파일, 그리고 실행에 필요한 다양한 모듈입니다.
-   user.js : 사용자 인터페이스, admin.js : 관리자 인터페이스
-   
-   
+  
    <p align="center">
   <a href="https://github.com/YoungJae98/Database_Project/">
     <img src="https://user-images.githubusercontent.com/46713032/86132151-7cc7b880-bb21-11ea-807a-4788f5f994df.png" alt="Vehicle logo" width="72" height="72">
