@@ -24,7 +24,7 @@ var db = mysql.createConnection({
     host: 'project.c2nx6ni5nucx.ap-northeast-2.rds.amazonaws.com',
     user: 'admin',
     database: 'pj',
-    password: 'admin',
+    password: '03170317',
     port: 3306
 });
 
