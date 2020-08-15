@@ -59,7 +59,6 @@ npm install -s express-session
 - [시스템 구성도](#시스템-구성도)
 - [ER 다이어그램](#ER-다이어그램)
 - [릴레이션 스키마](#릴레이션-스키마)
-- [저작권 및 라이선스](#저작권-및-라이선스)
 - [버그 및 기능 요청](#버그-및-기능-요청)
 - [기여자 정보](#기여자-정보)
 
@@ -102,14 +101,9 @@ npm install -s express-session
 ![물리 ERD](https://user-images.githubusercontent.com/46713032/86138578-9bca4880-bb29-11ea-8e0e-b468b164208a.png)
 
 
-## 저작권 및 라이선스
-
-[**GNU General Public License v3.0**](https://github.com/reyeon1209/Database_Project_2/blob/master/LICENSE)
-
-
 ## 버그 및 기능 요청
 
-[**여기에 해주세요**](https://github.com/reyeon1209/Database_Project_2/issues)
+[**여기에 해주세요**](https://github.com/YoungJae98/Database_Project_2/issues)
 
 
 ## 기여자 정보
